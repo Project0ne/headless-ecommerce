@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+.next/
+out/
+dist/
+build/
+target/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cache
+.cache/
+.temp/
+*.tsbuildinfo
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+.gradle/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Spring Boot
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/.mvn/
+
+# Test
+coverage/
+
+# WorkBuddy
+.workbuddy/

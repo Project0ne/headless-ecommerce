@@ -1,0 +1,159 @@
+%% 用户注册/登录
+sequenceDiagram
+    actor Client
+    participant AuthController
+    participant UserService
+    participant UserRepository
+    participant JwtTokenProvider
+
+    Note over Client,JwtTokenProvider: 注册流程
+    Client->>AuthController: POST /api/v1/auth/register {username, password}
+    AuthController->>UserService: register(request)
+    UserService->>UserRepository: existsByUsername(username)
+    UserRepository-->>UserService: false
+    UserService->>UserService: BCrypt加密密码
+    UserService->>UserRepository: save(user)
+    UserRepository-->>UserService: user
+    UserService->>JwtTokenProvider: generateToken(user)
+    JwtTokenProvider-->>UserService: token
+    UserService-->>AuthController: JwtResponse(token, user)
+    AuthController-->>Client: 200 {code, data: {token, user}, message}
+
+    Note over Client,JwtTokenProvider: 登录流程
+    Client->>AuthController: POST /api/v1/auth/login {username, password}
+    AuthController->>UserService: login(request)
+    UserService->>UserRepository: findByUsername(username)
+    UserRepository-->>UserService: user
+    UserService->>UserService: BCrypt验证密码
+    UserService->>JwtTokenProvider: generateToken(user)
+    JwtTokenProvider-->>UserService: token
+    UserService-->>AuthController: JwtResponse(token, user)
+    AuthController-->>Client: 200 {code, data: {token, user}, message}
+
+---
+
+%% 商品浏览与搜索
+sequenceDiagram
+    actor Client
+    participant ProductController
+    participant ProductService
+    participant ProductRepository
+
+    Note over Client,ProductRepository: 商品列表（分页+筛选+排序）
+    Client->>ProductController: GET /api/v1/products?page=0&size=12&categoryId=1&sort=price,asc&keyword=手机
+    ProductController->>ProductService: getProducts(pageable, categoryId, keyword)
+    ProductService->>ProductRepository: findAll(specification, pageable)
+    ProductRepository-->>ProductService: Page_Product_
+    ProductService->>ProductService: 转换为 ProductResponse
+    ProductService-->>ProductController: PageResponse_ProductResponse_
+    ProductController-->>Client: 200 {code, data: {content, totalElements, totalPages}, message}
+
+    Note over Client,ProductRepository: 商品详情
+    Client->>ProductController: GET /api/v1/products/{id}
+    ProductController->>ProductService: getProductById(id)
+    ProductService->>ProductRepository: findById(id)
+    ProductRepository-->>ProductService: product
+    ProductService-->>ProductController: ProductResponse
+    ProductController-->>Client: 200 {code, data: product, message}
+
+---
+
+%% 购物车操作（加购 / 登录合并）
+sequenceDiagram
+    actor Client
+    participant CartController
+    participant CartService
+    participant RedisTemplate
+    participant ProductService
+    participant ProductRepository
+
+    Note over Client,ProductRepository: 未登录 — 前端 LocalStorage 管理
+    Client->>Client: localStorage.setItem('cart', items)
+    Client->>Client: 页面刷新读取 localStorage
+
+    Note over Client,ProductRepository: 登录后 — 加购到 Redis
+    Client->>CartController: POST /api/v1/cart/items {productId, quantity}
+    CartController->>CartService: addToCart(userId, request)
+    CartService->>ProductService: getProductById(productId)
+    ProductService->>ProductRepository: findById(productId)
+    ProductRepository-->>ProductService: product
+    ProductService-->>CartService: product (校验上架+库存)
+    CartService->>RedisTemplate: HGET cart:{userId} {productId}
+    RedisTemplate-->>CartService: existingItem
+    alt 已存在
+        CartService->>RedisTemplate: HSET cart:{userId} {productId} {quantity: oldQty+newQty}
+    else 不存在
+        CartService->>RedisTemplate: HSET cart:{userId} {productId} {quantity: newQty}
+    end
+    CartService-->>CartController: CartItemResponse
+    CartController-->>Client: 200 {code, data: cartItem, message}
+
+    Note over Client,ProductRepository: 登录时合并购物车
+    Client->>CartController: POST /api/v1/cart/merge {items: [{productId, quantity}]}
+    CartController->>CartService: mergeCart(userId, localItems)
+    loop 遍历本地购物车项
+        CartService->>RedisTemplate: HGET cart:{userId} {productId}
+        alt Redis 已有该商品
+            CartService->>CartService: 取 max(本地数量, Redis数量)
+            CartService->>RedisTemplate: HSET cart:{userId} {productId} {mergedQty}
+        else Redis 没有该商品
+            CartService->>RedisTemplate: HSET cart:{userId} {productId} {quantity}
+        end
+    end
+    CartService-->>CartController: 合并后的购物车
+    CartController-->>Client: 200 {code, data: mergedCart, message}
+    Client->>Client: 清空 localStorage 购物车
+
+---
+
+%% 下单支付流程
+sequenceDiagram
+    actor Client
+    participant OrderController
+    participant OrderService
+    participant CartService
+    participant RedisTemplate
+    participant OrderRepository
+    participant ProductRepository
+    participant PaymentService
+    participant MockPaymentStrategy
+
+    Note over Client,MockPaymentStrategy: 创建订单
+    Client->>OrderController: POST /api/v1/orders {receiverName, phone, address}
+    OrderController->>OrderService: createOrder(userId, request)
+    OrderService->>CartService: getCart(userId)
+    CartService->>RedisTemplate: HGETALL cart:{userId}
+    RedisTemplate-->>CartService: cartItems
+    CartService-->>OrderService: cartItems
+    OrderService->>OrderService: 校验购物车非空 + 商品可购买
+    OrderService->>ProductRepository: findAllById(productIds) — 悲观锁
+    ProductRepository-->>OrderService: products
+    OrderService->>OrderService: 校验库存 + 扣减库存
+    OrderService->>OrderService: 生成订单号 + 计算总额 + 创建 OrderItem
+    OrderService->>OrderRepository: save(order)
+    OrderRepository-->>OrderService: savedOrder
+    OrderService->>CartService: clearCart(userId)
+    CartService->>RedisTemplate: DEL cart:{userId}
+    OrderService-->>OrderController: OrderResponse
+    OrderController-->>Client: 200 {code, data: {orderNo, totalAmount, status}, message}
+
+    Note over Client,MockPaymentStrategy: 模拟支付
+    Client->>OrderController: POST /api/v1/payments/{orderNo}
+    OrderController->>PaymentService: processPayment(orderNo)
+    PaymentService->>OrderRepository: findByOrderNo(orderNo)
+    OrderRepository-->>PaymentService: order
+    PaymentService->>PaymentService: 校验订单状态=PENDING_PAYMENT
+    PaymentService->>MockPaymentStrategy: pay(orderNo, totalAmount)
+    MockPaymentStrategy-->>PaymentService: PaymentResult(success=true)
+    PaymentService->>OrderService: updateOrderStatus(orderId, PENDING_SHIPMENT)
+    OrderService->>OrderRepository: save(order)
+    PaymentService-->>OrderController: PaymentResult
+    OrderController-->>Client: 200 {code, data: {success, transactionId}, message}
+
+    Note over Client,MockPaymentStrategy: 管理员发货
+    Client->>OrderController: PUT /api/v1/admin/orders/{id}/status {status: SHIPPING}
+    OrderController->>OrderService: updateOrderStatus(orderId, SHIPPING)
+    OrderService->>OrderService: 校验状态流转 PENDING_SHIPMENT → SHIPPING 合法
+    OrderService->>OrderRepository: save(order)
+    OrderService-->>OrderController: OrderResponse
+    OrderController-->>Client: 200 {code, data: order, message}

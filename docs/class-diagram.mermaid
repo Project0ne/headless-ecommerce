@@ -1,0 +1,131 @@
+classDiagram
+    direction TB
+
+    class User {
+        -Long id
+        -String username
+        -String password
+        -String nickname
+        -String avatar
+        -String phone
+        -String address
+        -UserRole role
+        -LocalDateTime createdAt
+        -LocalDateTime updatedAt
+    }
+
+    class UserRole {
+        <<enumeration>>
+        ADMIN
+        BUYER
+    }
+
+    class Product {
+        -Long id
+        -String name
+        -String description
+        -BigDecimal price
+        -Integer stock
+        -String imageUrl
+        -ProductStatus status
+        -Integer salesCount
+        -Category category
+        -LocalDateTime createdAt
+        -LocalDateTime updatedAt
+    }
+
+    class ProductStatus {
+        <<enumeration>>
+        ON_SHELF
+        OFF_SHELF
+    }
+
+    class Category {
+        -Long id
+        -String name
+        -String icon
+        -Integer sortOrder
+        -Category parent
+        -List~Category~ children
+        -LocalDateTime createdAt
+    }
+
+    class Order {
+        -Long id
+        -String orderNo
+        -User user
+        -BigDecimal totalAmount
+        -OrderStatus status
+        -String receiverName
+        -String receiverPhone
+        -String receiverAddress
+        -LocalDateTime paidAt
+        -LocalDateTime createdAt
+        -LocalDateTime updatedAt
+    }
+
+    class OrderStatus {
+        <<enumeration>>
+        PENDING_PAYMENT
+        PENDING_SHIPMENT
+        SHIPPING
+        COMPLETED
+        CANCELLED
+    }
+
+    class OrderItem {
+        -Long id
+        -Order order
+        -String productName
+        -String productImage
+        -BigDecimal unitPrice
+        -Integer quantity
+        -BigDecimal subtotal
+    }
+
+    class CartItemDTO {
+        -Long productId
+        -String productName
+        -String productImage
+        -BigDecimal unitPrice
+        -Integer quantity
+        -Boolean available
+        -Integer stock
+    }
+
+    class PaymentStrategy {
+        <<interface>>
+        +pay(orderNo: String, amount: BigDecimal) PaymentResult
+    }
+
+    class MockPaymentStrategy {
+        +pay(orderNo: String, amount: BigDecimal) PaymentResult
+    }
+
+    class PaymentResult {
+        -Boolean success
+        -String transactionId
+        -String message
+    }
+
+    class FileStorageService {
+        <<interface>>
+        +store(file: MultipartFile, subDir: String) String
+        +delete(fileUrl: String) void
+    }
+
+    class LocalFileStorageServiceImpl {
+        +store(file: MultipartFile, subDir: String) String
+        +delete(fileUrl: String) void
+    }
+
+    User "1" --> "0..*" Order : places
+    User "1" --> "*" UserRole : has
+    Order "1" --> "1..*" OrderItem : contains
+    Order "1" --> "1" OrderStatus : has
+    OrderItem "1" --> "1" Product : references
+    Product "1" --> "1" Category : belongs_to
+    Product "1" --> "1" ProductStatus : has
+    Category "1" --> "0..*" Category : parent_children
+    PaymentStrategy <|.. MockPaymentStrategy : implements
+    FileStorageService <|.. LocalFileStorageServiceImpl : implements

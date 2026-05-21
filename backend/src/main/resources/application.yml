@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: headless-ecommerce
+  profiles:
+    active: dev
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+app:
+  jwt:
+    secret: Y2hlbmd4aW5nLWhlYWRsZXNzLWVjb21tZXJjZS1qd3Qtc2VjcmV0LWtleS0yMDI0
+    expiration: 7200000
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+file:
+  upload-dir: uploads/
