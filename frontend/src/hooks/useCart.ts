@@ -42,17 +42,17 @@ export function useAddToCart() {
   const addItem = useCartStore((state) => state.addItem);
 
   return useMutation<ApiResponse<CartItem>, Error, CartItemRequest>({
-    mutationFn: addToCartApi,
+    mutationFn: async (variables) => {
+      if (!isAuthenticated) {
+        // For unauthenticated users, just add to local store (return a mock response)
+        addItem(variables);
+        return { code: 200, message: "Added to local cart", data: undefined } as unknown as ApiResponse<CartItem>;
+      }
+      return addToCartApi(variables);
+    },
     onSuccess: () => {
       if (isAuthenticated) {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
-      } else {
-        // For unauthenticated users, item is added to local store
-      }
-    },
-    onMutate: (variables) => {
-      if (!isAuthenticated) {
-        addItem(variables);
       }
     },
   });
@@ -71,16 +71,16 @@ export function useUpdateCartItem() {
     Error,
     { productId: number; quantity: number }
   >({
-    mutationFn: ({ productId, quantity }) =>
-      updateCartItemApi(productId, quantity),
+    mutationFn: async ({ productId, quantity }) => {
+      if (!isAuthenticated) {
+        updateQuantity(productId, quantity);
+        return { code: 200, message: "Updated local cart", data: undefined } as unknown as ApiResponse<CartItem>;
+      }
+      return updateCartItemApi(productId, quantity);
+    },
     onSuccess: () => {
       if (isAuthenticated) {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
-      }
-    },
-    onMutate: ({ productId, quantity }) => {
-      if (!isAuthenticated) {
-        updateQuantity(productId, quantity);
       }
     },
   });
@@ -95,15 +95,16 @@ export function useRemoveCartItem() {
   const removeItem = useCartStore((state) => state.removeItem);
 
   return useMutation<ApiResponse<void>, Error, number>({
-    mutationFn: removeCartItemApi,
+    mutationFn: async (productId) => {
+      if (!isAuthenticated) {
+        removeItem(productId);
+        return { code: 200, message: "Removed from local cart", data: undefined } as unknown as ApiResponse<void>;
+      }
+      return removeCartItemApi(productId);
+    },
     onSuccess: () => {
       if (isAuthenticated) {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
-      }
-    },
-    onMutate: (productId) => {
-      if (!isAuthenticated) {
-        removeItem(productId);
       }
     },
   });

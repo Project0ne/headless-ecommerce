@@ -5,11 +5,18 @@ import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/stores/cart-store";
 import { useAuthStore } from "@/stores/auth-store";
+import { useCart } from "@/hooks/useCart";
 
 export function CartIcon() {
   const localItemCount = useCartStore((s) => s.getTotalItems());
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const count = isAuthenticated ? 0 : localItemCount; // When authed, cart is from API
+  const { data: cartData } = useCart();
+
+  // Use API cart count for authenticated users, local store for guests
+  const apiItemCount = cartData?.data
+    ? cartData.data.reduce((sum, item) => sum + item.quantity, 0)
+    : 0;
+  const count = isAuthenticated ? apiItemCount : localItemCount;
 
   return (
     <Link href="/cart">

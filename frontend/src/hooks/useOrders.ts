@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuthStore } from "@/stores/auth-store";
 import {
   getUserOrders,
   getOrderById,
@@ -13,10 +14,12 @@ import type { OrderCreateRequest, OrderStatusUpdateRequest } from "@/types/order
  * Hook for fetching the user's orders.
  */
 export function useUserOrders(page = 0, size = 12) {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useQuery({
     queryKey: ["userOrders", page, size],
     queryFn: () => getUserOrders(page, size),
     select: (response) => response.data,
+    enabled: isAuthenticated,
   });
 }
 
@@ -24,11 +27,12 @@ export function useUserOrders(page = 0, size = 12) {
  * Hook for fetching a single order by ID.
  */
 export function useOrder(id: number) {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useQuery({
     queryKey: ["order", id],
     queryFn: () => getOrderById(id),
     select: (response) => response.data,
-    enabled: !!id,
+    enabled: !!id && isAuthenticated,
   });
 }
 
@@ -63,10 +67,12 @@ export function useCancelOrder() {
  * Hook for fetching all orders (admin).
  */
 export function useAllOrders(page = 0, size = 12) {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   return useQuery({
     queryKey: ["allOrders", page, size],
     queryFn: () => getAllOrders(page, size),
     select: (response) => response.data,
+    enabled: isAuthenticated,
   });
 }
 

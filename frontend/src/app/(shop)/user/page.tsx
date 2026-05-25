@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useEffect } from "react";
 import { useCurrentUser, useUpdateUser } from "@/hooks/useAuth";
 import { useAuthStore } from "@/stores/auth-store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +34,7 @@ export default function UserPage() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -42,6 +44,17 @@ export default function UserPage() {
       address: currentUser?.address || "",
     },
   });
+
+  // Reset form with loaded user data
+  useEffect(() => {
+    if (currentUser) {
+      reset({
+        nickname: currentUser.nickname || "",
+        phone: currentUser.phone || "",
+        address: currentUser.address || "",
+      });
+    }
+  }, [currentUser, reset]);
 
   const onSubmit = async (data: ProfileFormValues) => {
     try {

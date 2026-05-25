@@ -30,7 +30,8 @@ export function formatPrice(price: number): string {
  * @param dateStr the ISO date string
  * @returns formatted date string
  */
-export function formatDate(dateStr: string): string {
+export function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "N/A";
   return new Intl.DateTimeFormat("zh-CN", {
     year: "numeric",
     month: "2-digit",

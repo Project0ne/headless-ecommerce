@@ -2,6 +2,7 @@ package com.headless.ecommerce.service.impl;
 
 import com.headless.ecommerce.dto.request.LoginRequest;
 import com.headless.ecommerce.dto.request.RegisterRequest;
+import com.headless.ecommerce.dto.request.UserUpdateRequest;
 import com.headless.ecommerce.dto.response.JwtResponse;
 import com.headless.ecommerce.dto.response.UserResponse;
 import com.headless.ecommerce.exception.BusinessException;
@@ -85,20 +86,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse updateCurrentUser(Long userId, UserResponse userResponse) {
+    public UserResponse updateCurrentUser(Long userId, UserUpdateRequest request) {
         User user = findById(userId);
 
-        if (userResponse.getNickname() != null) {
-            user.setNickname(userResponse.getNickname());
+        if (request.nickname() != null) {
+            user.setNickname(request.nickname());
         }
-        if (userResponse.getAvatar() != null) {
-            user.setAvatar(userResponse.getAvatar());
+        if (request.avatar() != null) {
+            user.setAvatar(request.avatar());
         }
-        if (userResponse.getPhone() != null) {
-            user.setPhone(userResponse.getPhone());
+        if (request.phone() != null) {
+            user.setPhone(request.phone());
         }
-        if (userResponse.getAddress() != null) {
-            user.setAddress(userResponse.getAddress());
+        if (request.address() != null) {
+            user.setAddress(request.address());
         }
 
         User updatedUser = userRepository.save(user);

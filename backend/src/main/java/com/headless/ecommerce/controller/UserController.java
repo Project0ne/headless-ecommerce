@@ -1,11 +1,13 @@
 package com.headless.ecommerce.controller;
 
+import com.headless.ecommerce.dto.request.UserUpdateRequest;
 import com.headless.ecommerce.dto.response.ApiResponse;
 import com.headless.ecommerce.dto.response.UserResponse;
 import com.headless.ecommerce.exception.ResourceNotFoundException;
 import com.headless.ecommerce.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -43,16 +45,16 @@ public class UserController {
      * Updates the current authenticated user's profile.
      *
      * @param userDetails the authenticated user details
-     * @param userResponse the updated user data
+     * @param request the updated user data (safe fields only)
      * @return the updated user profile response
      */
     @PutMapping("/me")
     @Operation(summary = "Update current user profile")
     public ApiResponse<UserResponse> updateCurrentUser(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody UserResponse userResponse) {
+            @Valid @RequestBody UserUpdateRequest request) {
         Long userId = extractUserId(userDetails);
-        UserResponse response = userService.updateCurrentUser(userId, userResponse);
+        UserResponse response = userService.updateCurrentUser(userId, request);
         return ApiResponse.success(response);
     }
 

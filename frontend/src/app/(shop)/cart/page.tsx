@@ -19,16 +19,22 @@ export default function CartPage() {
   // Use server cart if authenticated, otherwise local cart
   const items = isAuthenticated ? (cartData?.data || localItems) : localItems;
 
+  const localUpdateQuantity = useCartStore((s) => s.updateQuantity);
+  const localRemoveItem = useCartStore((s) => s.removeItem);
+
   const handleUpdateQuantity = (productId: number, quantity: number) => {
     if (isAuthenticated) {
       updateCartItemMutation.mutate({ productId, quantity });
+    } else {
+      localUpdateQuantity(productId, quantity);
     }
-    // For unauthenticated users, the onMutate in the hook handles local state
   };
 
   const handleRemove = (productId: number) => {
     if (isAuthenticated) {
       removeCartItemMutation.mutate(productId);
+    } else {
+      localRemoveItem(productId);
     }
   };
 
