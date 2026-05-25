@@ -1,43 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getProducts } from "@/services/product-service";
-import { getCategories } from "@/services/category-service";
+import { useProducts } from "@/hooks/useProducts";
+import { useCategories } from "@/hooks/useCategories";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { formatPrice } from "@/lib/utils";
-import type { Product } from "@/types/product";
-import type { Category } from "@/types/category";
 import { ArrowRight, ShoppingBag, Truck, Shield, Headphones } from "lucide-react";
 
 export default function HomePage() {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: productsData, isLoading: productsLoading } = useProducts({
+    page: 0,
+    size: 8,
+    sort: "salesCount,desc",
+  });
+  const { data: categories, isLoading: categoriesLoading } = useCategories();
 
-  useEffect(() => {
-    Promise.all([
-      getProducts({ page: 0, size: 8, sort: "salesCount,desc" }),
-      getCategories(),
-    ])
-      .then(([productsRes, categoriesRes]) => {
-        if (productsRes.code === 200 && productsRes.data) {
-          setFeaturedProducts(productsRes.data.content);
-        }
-        if (categoriesRes.code === 200 && categoriesRes.data) {
-          setCategories(categoriesRes.data);
-        }
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+  const featuredProducts = productsData?.content ?? [];
+  const categoryList = categories ?? [];
+  const isLoading = productsLoading || categoriesLoading;
 
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-blue-50/50 to-purple-50/30 py-24 lg:py-32">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-blue-50/50 to-purple-50/30 dark:from-primary/10 dark:via-slate-900/50 dark:to-purple-950/30 py-24 lg:py-32">
         <div className="absolute inset-0 bg-[radial-gradient(at_40%_20%,color-mix(in_srgb,var(--color-primary)_8%,transparent)_0px,transparent_50%),radial-gradient(at_80%_0%,hsl(280_50%_50%/0.06)_0px,transparent_50%),radial-gradient(at_0%_50%,hsl(200_60%_50%/0.06)_0px,transparent_50%)] pointer-events-none" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-2xl animate-fade-in">
@@ -69,40 +56,29 @@ export default function HomePage() {
       <section className="border-b bg-background/50">
         <div className="container mx-auto px-4 py-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="flex items-center gap-3 rounded-xl bg-white/60 backdrop-blur-sm border border-white/50 shadow-elegant p-4">
-              <Truck className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-sm font-medium">Free Shipping</p>
-                <p className="text-xs text-muted-foreground">On all orders</p>
+            {[
+              { icon: Truck, title: "Free Shipping", desc: "On all orders" },
+              { icon: Shield, title: "Secure Payment", desc: "100% protected" },
+              { icon: Headphones, title: "24/7 Support", desc: "Always here" },
+              { icon: ShoppingBag, title: "Easy Returns", desc: "Hassle-free" },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div
+                key={title}
+                className="flex items-center gap-3 rounded-xl bg-card/60 backdrop-blur-sm border border-border/50 shadow-elegant p-4"
+              >
+                <Icon className="h-8 w-8 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">{title}</p>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl bg-white/60 backdrop-blur-sm border border-white/50 shadow-elegant p-4">
-              <Shield className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-sm font-medium">Secure Payment</p>
-                <p className="text-xs text-muted-foreground">100% protected</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl bg-white/60 backdrop-blur-sm border border-white/50 shadow-elegant p-4">
-              <Headphones className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-sm font-medium">24/7 Support</p>
-                <p className="text-xs text-muted-foreground">Always here</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl bg-white/60 backdrop-blur-sm border border-white/50 shadow-elegant p-4">
-              <ShoppingBag className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-sm font-medium">Easy Returns</p>
-                <p className="text-xs text-muted-foreground">Hassle-free</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Categories */}
-      {categories.length > 0 && (
+      {categoryList.length > 0 && (
         <section className="container mx-auto px-4 py-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Shop by Category</h2>
@@ -111,7 +87,7 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {categories.slice(0, 6).map((category) => (
+            {categoryList.slice(0, 6).map((category) => (
               <Link
                 key={category.id}
                 href={`/products?categoryId=${category.id}`}
@@ -148,7 +124,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-primary/5 via-blue-50/40 to-primary/5 py-16">
+      <section className="bg-gradient-to-r from-primary/5 via-blue-50/40 to-primary/5 dark:from-primary/10 dark:via-slate-900/40 dark:to-primary/10 py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Start Shopping?</h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">

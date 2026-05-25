@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 import { API_PATHS } from "@/lib/constants";
-import type { ApiResponse, PageResponse, PageParams } from "@/types/api";
+import type { ApiResponse, PageResponse } from "@/types/api";
 import type { Product, ProductFilters, ProductCreateRequest, ProductUpdateRequest } from "@/types/product";
 
 /**

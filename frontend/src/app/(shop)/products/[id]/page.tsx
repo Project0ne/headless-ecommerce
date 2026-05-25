@@ -26,14 +26,13 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = async () => {
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-      return;
-    }
     try {
       await addToCartMutation.mutateAsync({
         productId,
         quantity,
+        productName: product?.name,
+        productImage: product?.imageUrl,
+        unitPrice: product?.price,
       });
       toast({
         title: "Added to cart",

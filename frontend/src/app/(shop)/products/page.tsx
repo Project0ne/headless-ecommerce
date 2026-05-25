@@ -1,17 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useProducts } from "@/hooks/useProducts";
-import { getCategories } from "@/services/category-service";
+import { useCategories } from "@/hooks/useCategories";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ProductFilters } from "@/components/product/ProductFilters";
 import { PaginationComponent } from "@/components/common/Pagination";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import type { ProductFilters as ProductFiltersType } from "@/types/product";
-import type { Category } from "@/types/category";
 
-export default function ProductsPage() {
+function ProductsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -26,16 +25,7 @@ export default function ProductsPage() {
     size: 12,
   });
 
-  const [categories, setCategories] = useState<Category[]>([]);
-
-  useEffect(() => {
-    getCategories().then((res) => {
-      if (res.code === 200 && res.data) {
-        setCategories(res.data);
-      }
-    });
-  }, []);
-
+  const { data: categories } = useCategories();
   const { data: pageData, isLoading } = useProducts(filters);
 
   const handleFiltersChange = (newFilters: ProductFiltersType) => {
@@ -66,7 +56,7 @@ export default function ProductsPage() {
       <div className="mb-6">
         <ProductFilters
           filters={filters}
-          categories={categories}
+          categories={categories ?? []}
           onFiltersChange={handleFiltersChange}
         />
       </div>
@@ -91,5 +81,13 @@ export default function ProductsPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center py-20"><LoadingSpinner /></div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }

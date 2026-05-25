@@ -10,6 +10,7 @@ import {
   clearCart as clearCartApi,
 } from "@/services/cart-service";
 import type { CartItemRequest, MergeCartRequest } from "@/types/cart";
+import type { CartItemAddRequest } from "@/stores/cart-store";
 import type { CartItem } from "@/types/cart";
 import type { ApiResponse } from "@/types/api";
 
@@ -35,20 +36,22 @@ export function useCart() {
 
 /**
  * Hook for adding an item to the cart.
+ * Accepts optional product details for local cart storage.
  */
 export function useAddToCart() {
   const queryClient = useQueryClient();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const addItem = useCartStore((state) => state.addItem);
 
-  return useMutation<ApiResponse<CartItem>, Error, CartItemRequest>({
+  return useMutation<ApiResponse<CartItem>, Error, CartItemAddRequest>({
     mutationFn: async (variables) => {
       if (!isAuthenticated) {
-        // For unauthenticated users, just add to local store (return a mock response)
         addItem(variables);
         return { code: 200, message: "Added to local cart", data: undefined } as unknown as ApiResponse<CartItem>;
       }
-      return addToCartApi(variables);
+      // Only send productId and quantity to the API
+      const { productId, quantity } = variables;
+      return addToCartApi({ productId, quantity });
     },
     onSuccess: () => {
       if (isAuthenticated) {

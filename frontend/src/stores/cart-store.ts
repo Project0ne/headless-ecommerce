@@ -2,11 +2,18 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { CartItem, CartItemRequest } from "@/types/cart";
 
+/** Extended cart item request with optional product details for local storage */
+export interface CartItemAddRequest extends CartItemRequest {
+  productName?: string;
+  productImage?: string;
+  unitPrice?: number;
+}
+
 /** Cart state interface */
 interface CartState {
   items: CartItem[];
   setItems: (items: CartItem[]) => void;
-  addItem: (item: CartItemRequest) => void;
+  addItem: (item: CartItemAddRequest) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   removeItem: (productId: number) => void;
   clearCart: () => void;
@@ -27,7 +34,7 @@ export const useCartStore = create<CartState>()(
         set({ items });
       },
 
-      addItem: (item: CartItemRequest) => {
+      addItem: (item: CartItemAddRequest) => {
         set((state) => {
           const existing = state.items.find(
             (i) => i.productId === item.productId
@@ -41,12 +48,11 @@ export const useCartStore = create<CartState>()(
               ),
             };
           }
-          // When adding locally, we don't have full product details yet
           const newItem: CartItem = {
             productId: item.productId,
-            productName: "",
-            productImage: "",
-            unitPrice: 0,
+            productName: item.productName || "",
+            productImage: item.productImage || "",
+            unitPrice: item.unitPrice || 0,
             quantity: item.quantity,
             available: true,
             stock: 0,

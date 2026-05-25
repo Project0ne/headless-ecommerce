@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Search, ShoppingCart, Menu, User, LogOut } from "lucide-react";
+import { Search, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/auth-store";
 import { CartIcon } from "@/components/cart/CartIcon";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 export function Header() {
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -23,7 +24,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-white/80 backdrop-blur-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+    <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
@@ -32,14 +33,15 @@ export function Header() {
 
         {/* Desktop Search */}
         <form onSubmit={handleSearch} className="hidden md:flex items-center gap-2 max-w-sm flex-1 mx-8">
-          <Input placeholder="Search products..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="flex-1 bg-white/50 border-border/50 shadow-inner" />
+          <Input placeholder="Search products..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="flex-1 bg-background/50 border-border/50 shadow-inner" />
           <Button type="submit" size="icon" variant="ghost"><Search className="h-4 w-4" /></Button>
         </form>
 
         {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-2">
           <Link href="/products"><Button variant="ghost">Products</Button></Link>
           <CartIcon />
+          <ThemeToggle />
           {isAuthenticated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -65,6 +67,7 @@ export function Header() {
         {/* Mobile Menu */}
         <div className="flex md:hidden items-center gap-2">
           <CartIcon />
+          <ThemeToggle />
           <Sheet>
             <SheetTrigger asChild><Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button></SheetTrigger>
             <SheetContent side="right">
