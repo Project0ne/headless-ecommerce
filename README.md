@@ -14,6 +14,39 @@ A WooCommerce-level headless e-commerce system with theme switching support, bui
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
+---
+
+## 🚀 One-Click Deploy (Recommended)
+
+**Just 3 commands to get started - No configuration needed!**
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Project0ne/headless-ecommerce.git
+cd headless-ecommerce
+
+# 2. Run the installer
+# Windows:
+install.bat
+
+# Mac/Linux:
+chmod +x install.sh && ./install.sh
+```
+
+**That's it!** Access your store at http://localhost:3000
+
+| URL | Description |
+|-----|-------------|
+| http://localhost:3000 | Store Front |
+| http://localhost:3000/admin | Admin Dashboard |
+| http://localhost:3000/admin/settings | Admin Settings (17 modules) |
+
+**Default Admin:** `admin` / `admin123`
+
+> 💡 **No .env file needed!** The installer configures everything automatically with sensible defaults.
+
+---
+
 ## Features
 
 ### Core E-commerce
@@ -351,6 +384,39 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
+
+---
+
+## 🚀 一键部署（推荐）
+
+**只需 3 条命令即可开始 - 无需任何配置！**
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/Project0ne/headless-ecommerce.git
+cd headless-ecommerce
+
+# 2. 运行安装脚本
+# Windows:
+install.bat
+
+# Mac/Linux:
+chmod +x install.sh && ./install.sh
+```
+
+**搞定！** 访问 http://localhost:3000 查看您的商店
+
+| 地址 | 说明 |
+|------|------|
+| http://localhost:3000 | 商店前台 |
+| http://localhost:3000/admin | 管理后台 |
+| http://localhost:3000/admin/settings | 后台设置（17 个模块） |
+
+**默认管理员：** `admin` / `admin123`
+
+> 💡 **无需配置 .env 文件！** 安装脚本会自动使用合理的默认配置。
+
+---
 
 ## 功能特性
 

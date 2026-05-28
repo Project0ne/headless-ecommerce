@@ -1,5 +1,6 @@
-# Headless E-Commerce - One-Click Deployment
-# GitHub: https://github.com/Project0ne/headless-ecommerce
+# Headless E-Commerce - Production Deployment
+# Pull pre-built images from Docker Hub (no local build needed)
+# Usage: docker compose -f docker-compose.prod.yml up -d
 
 version: "3.8"
 
@@ -17,7 +18,6 @@ services:
       - "${DB_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -40,10 +40,7 @@ services:
       retries: 5
 
   backend:
-    image: headless-ecommerce/backend:latest
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: project0ne/headless-ecommerce-backend:latest
     container_name: headless-ecommerce-backend
     restart: unless-stopped
     environment:
@@ -68,10 +65,7 @@ services:
       - upload-data:/app/uploads
 
   frontend:
-    image: headless-ecommerce/frontend:latest
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: project0ne/headless-ecommerce-frontend:latest
     container_name: headless-ecommerce-frontend
     restart: unless-stopped
     environment:
