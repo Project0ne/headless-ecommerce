@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * Product response DTO.
@@ -22,6 +23,7 @@ public class ProductResponse {
     private BigDecimal price;
     private Integer stock;
     private String imageUrl;
+    private List<ProductImageResponse> images;
     private String status;
     private Integer salesCount;
     private Long categoryId;

@@ -1,5 +1,12 @@
 /** Product type definitions matching backend DTOs */
 
+export interface ProductImage {
+  id: number;
+  imageUrl: string;
+  sortOrder: number;
+  isPrimary: boolean;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -7,6 +14,7 @@ export interface Product {
   price: number;
   stock: number;
   imageUrl: string;
+  images: ProductImage[];
   status: "ON_SHELF" | "OFF_SHELF";
   salesCount: number;
   categoryId: number;
@@ -21,6 +29,7 @@ export interface ProductCreateRequest {
   price: number;
   stock: number;
   imageUrl?: string;
+  images?: { imageUrl: string; sortOrder: number; isPrimary: boolean }[];
   categoryId: number;
 }
 
@@ -30,6 +39,7 @@ export interface ProductUpdateRequest {
   price?: number;
   stock?: number;
   imageUrl?: string;
+  images?: { imageUrl: string; sortOrder: number; isPrimary: boolean }[];
   categoryId?: number;
 }
 

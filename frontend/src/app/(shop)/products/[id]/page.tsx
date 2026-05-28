@@ -5,7 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useProduct } from "@/hooks/useProducts";
 import { useAddToCart } from "@/hooks/useCart";
 import { useAuthStore } from "@/stores/auth-store";
-import { ProductImageGallery } from "@/components/product/ProductImageGallery";
+import { ImageGallery } from "@/components/product/ImageGallery";
+import { ReviewSection } from "@/components/product/ReviewSection";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -70,7 +71,11 @@ export default function ProductDetailPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         {/* Image */}
-        <ProductImageGallery imageUrl={product.imageUrl} name={product.name} />
+        <ImageGallery
+          images={product.images || []}
+          fallbackImageUrl={product.imageUrl}
+          productName={product.name}
+        />
 
         {/* Details */}
         <div className="space-y-6">
@@ -153,6 +158,12 @@ export default function ProductDetailPage() {
             </Button>
           </div>
         </div>
+      </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="mt-12">
+        <ReviewSection productId={productId} />
       </div>
     </div>
   );

@@ -1,55 +1,34 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-
-type Theme = "light" | "dark" | "system";
+import { createContext, useContext, useEffect } from "react";
+import { useThemeStore } from "@/stores/theme-store";
+import type { ThemeMode } from "@/lib/themes";
 
 interface ThemeContextType {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-  resolvedTheme: "light" | "dark";
+  themeId: string;
+  mode: ThemeMode;
+  setThemeId: (id: string) => void;
+  setMode: (mode: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("system");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+  const { themeId, mode, setTheme, setMode, initialize } = useThemeStore();
 
   useEffect(() => {
-    const stored = localStorage.getItem("theme") as Theme | null;
-    if (stored) {
-      setTheme(stored);
-    }
-  }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-
-    const applyTheme = (t: "light" | "dark") => {
-      root.classList.remove("light", "dark");
-      root.classList.add(t);
-      setResolvedTheme(t);
-    };
-
-    if (theme === "system") {
-      const mq = window.matchMedia("(prefers-color-scheme: dark)");
-      applyTheme(mq.matches ? "dark" : "light");
-      const handler = (e: MediaQueryListEvent) => applyTheme(e.matches ? "dark" : "light");
-      mq.addEventListener("change", handler);
-      return () => mq.removeEventListener("change", handler);
-    } else {
-      applyTheme(theme);
-    }
-  }, [theme]);
-
-  const handleSetTheme = (t: Theme) => {
-    setTheme(t);
-    localStorage.setItem("theme", t);
-  };
+    initialize();
+  }, [initialize]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme, resolvedTheme }}>
+    <ThemeContext.Provider
+      value={{
+        themeId,
+        mode,
+        setThemeId: setTheme,
+        setMode,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );

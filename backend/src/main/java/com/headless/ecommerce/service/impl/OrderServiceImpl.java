@@ -28,7 +28,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Random;
+import java.util.UUID;
 
 /**
  * Implementation of OrderService for order management.
@@ -243,10 +243,13 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * Restores stock for all items in a cancelled order.
+     * Public method to allow reuse by OrderTimeoutScheduler.
      *
      * @param order the cancelled order
      */
-    private void restoreStock(Order order) {
+    @Override
+    @Transactional
+    public void restoreStock(Order order) {
         for (OrderItem item : order.getOrderItems()) {
             if (item.getProductId() != null) {
                 productRepository.findById(item.getProductId()).ifPresent(product -> {
@@ -259,15 +262,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * Generates a unique order number.
+     * Generates a unique order number using timestamp + UUID prefix.
      *
      * @return the generated order number
      */
     private String generateOrderNo() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String timestamp = LocalDateTime.now().format(formatter);
-        int random = new Random().nextInt(9000) + 1000;
-        return "ORD" + timestamp + random;
+        String uuidPrefix = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        return "ORD" + timestamp + uuidPrefix;
     }
 
     /**

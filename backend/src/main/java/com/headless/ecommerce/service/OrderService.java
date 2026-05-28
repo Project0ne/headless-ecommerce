@@ -3,6 +3,7 @@ package com.headless.ecommerce.service;
 import com.headless.ecommerce.dto.request.OrderCreateRequest;
 import com.headless.ecommerce.dto.response.OrderResponse;
 import com.headless.ecommerce.dto.response.PageResponse;
+import com.headless.ecommerce.model.Order;
 import com.headless.ecommerce.model.enums.OrderStatus;
 
 /**
@@ -64,4 +65,12 @@ public interface OrderService {
      * @return paginated order response
      */
     PageResponse<OrderResponse> getAllOrders(int page, int size);
+
+    /**
+     * Restores stock for all items in a cancelled order.
+     * Used by OrderTimeoutScheduler to avoid code duplication.
+     *
+     * @param order the cancelled order
+     */
+    void restoreStock(Order order);
 }

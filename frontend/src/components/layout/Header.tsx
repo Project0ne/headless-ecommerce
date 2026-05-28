@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuthStore } from "@/stores/auth-store";
 import { CartIcon } from "@/components/cart/CartIcon";
-import { ThemeToggle } from "@/components/common/ThemeToggle";
+import { ThemeSwitcher } from "@/components/common/ThemeSwitcher";
 
 export function Header() {
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -24,11 +24,11 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl shadow-sm">
+    <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl shadow-sm dark:glass-dark">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">E-Shop</span>
+          <span className="text-xl font-bold text-gradient-primary">E-Shop</span>
         </Link>
 
         {/* Desktop Search */}
@@ -41,7 +41,7 @@ export function Header() {
         <div className="hidden md:flex items-center gap-2">
           <Link href="/products"><Button variant="ghost">Products</Button></Link>
           <CartIcon />
-          <ThemeToggle />
+          <ThemeSwitcher />
           {isAuthenticated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -67,7 +67,7 @@ export function Header() {
         {/* Mobile Menu */}
         <div className="flex md:hidden items-center gap-2">
           <CartIcon />
-          <ThemeToggle />
+          <ThemeSwitcher />
           <Sheet>
             <SheetTrigger asChild><Button variant="ghost" size="icon"><Menu className="h-5 w-5" /></Button></SheetTrigger>
             <SheetContent side="right">

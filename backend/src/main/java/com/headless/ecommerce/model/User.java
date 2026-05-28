@@ -47,6 +47,18 @@ public class User {
     @Builder.Default
     private UserRole role = UserRole.BUYER;
 
+    @Column(name = "total_points", nullable = false)
+    @Builder.Default
+    private Integer totalPoints = 0;
+
+    @Column(name = "available_points", nullable = false)
+    @Builder.Default
+    private Integer availablePoints = 0;
+
+    @Column(name = "member_level", length = 20)
+    @Builder.Default
+    private String memberLevel = "BRONZE";
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

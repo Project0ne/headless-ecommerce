@@ -11,6 +11,7 @@ import { useCartStore } from "@/stores/cart-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { processPayment } from "@/services/payment-service";
 import { CartItemRow } from "@/components/cart/CartItemRow";
+import { CouponInput } from "@/components/cart/CouponInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,12 +38,15 @@ export default function CheckoutPage() {
   const createOrderMutation = useCreateOrder();
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [discount, setDiscount] = useState(0);
+  const [couponCode, setCouponCode] = useState<string | null>(null);
 
   const items = isAuthenticated ? (cartData?.data || localItems) : localItems;
-  const totalPrice = items.reduce(
+  const subtotal = items.reduce(
     (sum, item) => sum + item.unitPrice * item.quantity,
     0
   );
+  const totalPrice = subtotal - discount;
 
   const {
     register,
@@ -202,6 +206,25 @@ export default function CheckoutPage() {
                   <span className="text-muted-foreground">Shipping</span>
                   <span className="font-medium text-green-600">Free</span>
                 </div>
+
+                {/* Coupon Input */}
+                <div className="pt-2">
+                  <CouponInput
+                    orderAmount={subtotal}
+                    onCouponApplied={(d, code) => {
+                      setDiscount(d);
+                      setCouponCode(code);
+                    }}
+                  />
+                </div>
+
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-600">Discount ({couponCode})</span>
+                    <span className="font-medium text-green-600">-{formatPrice(discount)}</span>
+                  </div>
+                )}
+
                 <Separator className="bg-border/50" />
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Total</span>

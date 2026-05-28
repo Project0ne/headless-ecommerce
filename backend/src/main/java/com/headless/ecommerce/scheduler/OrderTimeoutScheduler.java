@@ -1,10 +1,9 @@
 package com.headless.ecommerce.scheduler;
 
 import com.headless.ecommerce.model.Order;
-import com.headless.ecommerce.model.OrderItem;
 import com.headless.ecommerce.model.enums.OrderStatus;
 import com.headless.ecommerce.repository.OrderRepository;
-import com.headless.ecommerce.repository.ProductRepository;
+import com.headless.ecommerce.service.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,12 +23,12 @@ public class OrderTimeoutScheduler {
     private static final int TIMEOUT_MINUTES = 30;
 
     private final OrderRepository orderRepository;
-    private final ProductRepository productRepository;
+    private final OrderService orderService;
 
     public OrderTimeoutScheduler(OrderRepository orderRepository,
-                                  ProductRepository productRepository) {
+                                  OrderService orderService) {
         this.orderRepository = orderRepository;
-        this.productRepository = productRepository;
+        this.orderService = orderService;
     }
 
     /**
@@ -49,27 +48,10 @@ public class OrderTimeoutScheduler {
                 order.setStatus(OrderStatus.CANCELLED);
                 orderRepository.save(order);
 
-                // Restore stock
-                restoreStock(order);
+                // Restore stock using shared service method
+                orderService.restoreStock(order);
 
                 logger.info("Cancelled timed-out order: {}", order.getOrderNo());
-            }
-        }
-    }
-
-    /**
-     * Restores stock for all items in a cancelled order.
-     *
-     * @param order the cancelled order
-     */
-    private void restoreStock(Order order) {
-        for (OrderItem item : order.getOrderItems()) {
-            if (item.getProductId() != null) {
-                productRepository.findById(item.getProductId()).ifPresent(product -> {
-                    product.setStock(product.getStock() + item.getQuantity());
-                    product.setSalesCount(Math.max(0, product.getSalesCount() - item.getQuantity()));
-                    productRepository.save(product);
-                });
             }
         }
     }

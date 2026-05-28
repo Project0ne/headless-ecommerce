@@ -12,7 +12,7 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/products/${product.id}`}>
-      <Card className="group overflow-hidden rounded-xl border-0 shadow-elegant hover:shadow-lifted transition-all duration-300 hover:-translate-y-1 bg-card">
+      <Card className="group overflow-hidden rounded-xl border-0 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 bg-card hover-lift">
         <div className="relative aspect-square overflow-hidden bg-muted">
           {product.imageUrl ? (
             <img
@@ -29,7 +29,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
         <CardContent className="p-4">
           <h3 className="font-medium text-sm line-clamp-2 min-h-[2.5rem]">{product.name}</h3>
-          <span className="mt-2 inline-block text-lg font-bold text-primary bg-primary/5 rounded-md px-2 py-0.5">
+          <span className="mt-2 inline-block text-lg font-bold text-gradient-primary bg-primary/5 rounded-md px-2 py-0.5">
             {formatPrice(product.price)}
           </span>
           {product.salesCount > 0 && (

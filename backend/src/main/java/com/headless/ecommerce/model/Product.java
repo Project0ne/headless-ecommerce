@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Product entity representing a sellable item.
@@ -40,6 +42,11 @@ public class Product {
 
     @Column(name = "image_url", length = 255)
     private String imageUrl;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    @Builder.Default
+    private List<ProductImage> images = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)

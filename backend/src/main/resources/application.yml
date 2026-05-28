@@ -25,8 +25,8 @@ spring:
 
 app:
   jwt:
-    secret: Y2hlbmd4aW5nLWhlYWRsZXNzLWVjb21tZXJjZS1qd3Qtc2VjcmV0LWtleS0yMDI0
-    expiration: 7200000
+    secret: ${JWT_SECRET:Y2hlbmd4aW5nLWhlYWRsZXNzLWVjb21tZXJjZS1qd3Qtc2VjcmV0LWtleS0yMDI0}
+    expiration: ${JWT_EXPIRATION:7200000}
 
 springdoc:
   api-docs:
